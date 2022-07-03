@@ -1,0 +1,120 @@
+!PE1
+!
+ena
+conf t
+hostn PE1
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-time 0 0
+exit
+!
+!
+!######Setup the VRF and RD
+!
+ip vrf HTBOLSAS
+rd 65001:0001
+ip vrf ZCLOUD
+rd 65002:0001
+exit
+!
+!
+int lo0
+ip add 3.3.3.3 255.255.255.255
+no shut
+!
+int e0/0
+ip add 10.11.0.1 255.255.255.252
+no shut
+!
+int e0/1
+ip add 10.21.0.1 255.255.255.252
+no shut
+!
+int e0/2
+ip vrf forwarding HTBOLSAS
+ip add 10.101.0.1 255.255.255.252
+no shut
+!
+int e0/3
+ip vrf forwarding HTBOLSAS
+ip add 10.102.0.1 255.255.255.252
+no shut
+!
+int e1/0
+ip vrf forwarding ZCLOUD
+ip add 10.103.0.1 255.255.255.252
+no shut
+exit
+!
+!######Setup the OSPF
+!
+router ospf 1
+router-id 3.3.3.3
+network 10.11.0.0 0.0.0.3 area 0
+network 10.21.0.0 0.0.0.3 area 0
+network 3.3.3.3 0.0.0.0 area 0
+passive-interface loopback 0
+exit
+!
+int ran e0/0-1
+ip ospf network point-to-point
+exit
+!
+!
+!#######Setup the MPLS
+!
+mpls label protocol ldp
+mpls ldp router-id lo0
+!
+router ospf 1
+mpls ldp autoconfig
+exit
+!
+!
+!#######Setup the BGP
+!
+router bgp 64900
+bgp router-id 3.3.3.3
+neighbor IBGP64900 peer-group
+neighbor IBGP64900 remote-as 64900
+neighbor IBGP64900 update-source loopback 0
+neighbor 4.4.4.4 peer-group IBGP64900
+neighbor 5.5.5.5 peer-group IBGP64900
+neighbor 6.6.6.6 peer-group IBGP64900
+!
+address-family vpnv4 uni
+neighbor 4.4.4.4 activate
+neighbor 5.5.5.5 activate
+neighbor 6.6.6.6 activate
+neighbor IBGP64900 send-community extended
+exit
+!
+address-family ipv4 uni vrf HTBOLSAS
+neighbor 10.101.0.2 remote-as 65001
+neighbor 10.101.0.2 activate
+neighbor 10.102.0.2 remote-as 65001
+neighbor 10.102.0.2 activate
+exit
+!
+address-family ipv4 uni vrf ZCLOUD
+neighbor 10.103.0.2 remote-as 65002
+neighbor 10.103.0.2 activate
+exit
+!
+exit
+!
+!######VRF import and export the Route Target-RT from ASs and VRFs
+!
+ip vrf ZCLOUD
+route-target export 65002:100
+route-target import 65002:100
+exit
+!
+ip vrf HTBOLSAS
+route-target export 65001:100
+route-target import 65001:100
+exit
+!
+
