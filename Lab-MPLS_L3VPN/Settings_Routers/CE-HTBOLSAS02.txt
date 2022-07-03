@@ -1,0 +1,33 @@
+!CE-HTBOLSAS02
+!
+ena
+conf t
+hostn CE-HTBOLSAS02
+no ip domain-lookup
+!
+!
+line con 0
+logging syn
+exec-time 0 0
+exit
+!
+!
+int lo0
+ip add 192.168.2.1 255.255.255.0
+no shut
+!
+int e0/3
+ip add 10.102.0.2 255.255.255.252
+no shut
+!
+!
+router bgp 65001
+neighbor 10.102.0.1 remote-as 64900
+neighbor 10.102.0.1 allowas-in 1
+network 192.168.2.0 mask 255.255.255.0
+exit
+!
+exit
+!
+wr
+!

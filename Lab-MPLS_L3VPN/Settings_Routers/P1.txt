@@ -1,0 +1,50 @@
+!P1
+!
+ena
+conf t
+hostn P1
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-time 0 0
+exit
+!
+!
+int lo0
+ip add 1.1.1.1 255.255.255.255
+no shut
+!
+int e0/0
+ip add 10.11.0.2 255.255.255.252
+no shut
+!
+int e0/1
+ip add 10.12.0.2 255.255.255.252
+no shut
+exit
+!
+!######Setup the OSPF
+!
+router ospf 1
+router-id 1.1.1.1
+network 10.11.0.0 0.0.0.3 area 0
+network 10.12.0.0 0.0.0.3 area 0
+network 1.1.1.1 0.0.0.0 area 0
+passive-interface loopback 0
+exit
+!
+int ran e0/0-1
+ip ospf network point-to-point
+exit
+!
+!
+!#######Setup the MPLS
+!
+mpls label protocol ldp
+mpls ldp router-id lo0
+!
+router ospf 1
+mpls ldp autoconfig
+exit
+!

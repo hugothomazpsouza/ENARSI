@@ -1,0 +1,31 @@
+!CE-ZCLOUD02
+!
+ena
+conf t
+hostn CE-ZCLOUD02
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-time 0 0
+exit
+!
+!
+int lo0
+ip add 192.168.2.1 255.255.255.0
+no shut
+!
+int e0/3
+ip add 10.107.0.2 255.255.255.252
+no shut
+exit
+!
+!
+!Setup the BGP
+!
+router bgp 65002
+neighbor 10.107.0.1 remote-as 64900
+neighbor 10.107.0.1 allowas-in 1
+network 192.168.2.0 mask 255.255.255.0
+exit
+!
