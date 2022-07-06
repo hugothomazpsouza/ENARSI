@@ -58,11 +58,41 @@ tunnel key 100
 tunnel mode gre multipoint
 exit
 !
+!
+!#### Setup VPN IPSec - IKEv1
+!Define the Phase 1
+!
+crypto isakmp policy 1
+hash sha256
+authentication pre-share
+group 14
+encryption aes 256
+exit
+!
+!Define the pre-share key
+crypto isakmp key CISCO address 0.0.0.0
+!
+!Define the Phase 2
+crypto ipsec transform-set NAME_PHASE2 esp-aes 256 ah-sha256-hmac
+mode transport
+exit
+!
+!Create a profile to assign to Transform-set
+crypto ipsec profile IPSEC-CONNECTION
+set transform-set NAME_PHASE2
+exit
+!
+!
+!#### Apply the VPN IPSEC profile to Tunnel 0 from DMVNP
+!
+int tun 0
+tunnel protection ipsec profile IPSEC-CONNECTION
+!
+!
 end
 !
 wr
 !
 !
-!
-ping 10.0.0.254 source tunnel0
+ping 10.0.0.254 source tun0
 !
