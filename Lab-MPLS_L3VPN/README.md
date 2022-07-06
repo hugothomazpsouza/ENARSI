@@ -20,7 +20,7 @@ Below is information about the goals, settings, EVE-NG file and diagram used.
 
 ## Diagram
 
-- The diagram can be found in the "Diagram" directory.
+![Test Image 1](https://github.com/hugothomazpsouza/ENARSI/blob/main/Lab-MPLS_L3VPN/Diagram/MPLS_L3VPN.jpg)
 
 
 
