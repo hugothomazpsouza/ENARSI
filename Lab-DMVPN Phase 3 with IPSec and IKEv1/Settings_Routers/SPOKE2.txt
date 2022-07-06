@@ -1,0 +1,68 @@
+!<SPOKE2>
+!
+ena
+conf t
+!
+hostname SPOKE2
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-timeout 0 0
+exit
+!
+!
+int e0/2
+description SPOKE2 to ISP
+ip add 152.0.0.2 255.255.255.252
+no shut
+!
+int lo1922
+description LAN
+ip add 192.168.2.1 255.255.255.0
+no shut
+!
+!
+!#### Setup BGP Session
+!
+router bgp 400
+bgp router-id 4.0.0.1
+neighbor 152.0.0.1 remote-as 200
+network 152.0.0.0 mask 255.255.255.252
+exit
+!
+!
+!#### Setup EIGRP routing protocol
+!
+router eigrp 1
+network 192.168.2.0 0.0.0.255
+network 10.0.0.0 0.0.0.255
+exit
+!
+!
+!#### Setup Interface Tunnel0 for the DMVPN connection
+!
+int tun 0
+description DMVPN Tunnel
+ip add 10.0.0.2 255.255.255.0
+tunnel source e0/2
+ip mtu 1400
+ip tcp adjust-mss 1360
+ip nhrp nhs 10.0.0.254 			 	! ip nhrp nhs <HUB NBMA address>
+ip nhrp map 10.0.0.254 199.0.0.2	! ip nhrp map <HUB NBMA address> <HUB Public IP address>
+ip nhrp map multicast 199.0.0.2		! ip nhrp map multicast <HUB Public IP address>
+ip nhrp shortcut
+ip nhrp authentication CISCO
+ip nhrp network-id 1
+tunnel key 100
+tunnel mode gre multipoint
+exit
+!
+end
+!
+wr
+!
+!
+!
+ping 10.0.0.254 source tunnel0
+!

@@ -1,0 +1,66 @@
+!<HUB>
+!
+ena
+conf t
+!
+hostname HUB
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-timeout 0 0
+exit
+!
+!
+int e0/0
+description HUB to ISP
+ip add 199.0.0.2 255.255.255.252
+no shut
+!
+int lo1920
+description LAN
+ip add 192.168.0.1 255.255.255.0
+no shut
+exit
+!
+!
+!#### Setup BGP session
+!
+router bgp 100
+bgp router-id 100.0.0.1
+neighbor 199.0.0.1 remote-as 200
+network 199.0.0.0 mask 255.255.255.252
+exit
+!
+!
+!#### Setup EIGRP routing protocol
+!
+router eigrp 1
+network 192.168.0.0 0.0.0.255
+network 10.0.0.0 0.0.0.255
+exit
+!
+!#### Setup Interface Tunnel0 for the DMVPN connection
+!
+int tunnel 0
+description DMVPN Tunnel
+ip add 10.0.0.254 255.255.255.0
+tunnel source e0/0
+ip mtu 1400
+ip tcp adjust-mss 1360
+ip nhrp map multicast dynamic
+ip nhrp authentication CISCO
+ip nhrp network-id 1
+tunnel key 100
+tunnel mode gre multipoint
+no ip split-horizon eigrp 1
+no ip next-hop-self eigrp 1
+ip summary-address eigrp 1 192.168.0.0 255.255.0.0
+ip nhrp redirect
+no shut
+exit
+!
+end
+!
+wr
+!

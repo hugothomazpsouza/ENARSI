@@ -1,0 +1,55 @@
+!<ISP>
+!
+ena
+conf t
+!
+hostname ISP
+no ip domain-lookup
+!
+line con 0
+logging syn
+exec-timeout 0 0
+exit
+!
+!
+int e0/0
+description ISP to HUB
+ip add 199.0.0.1 255.255.255.252
+no shut
+!
+int e0/1
+description ISP to SPOKE1
+ip add 151.0.0.1 255.255.255.252
+no shut
+!
+int e0/2
+description ISP to SPOKE2
+ip add 152.0.0.1 255.255.255.252
+no shut
+!
+int e0/3
+description ISP to SPOKE3
+ip add 153.0.0.1 255.255.255.252
+no shut
+exit
+!
+!
+!#### Setup BGP Sessions
+!
+router bgp 200
+bgp router-id 200.0.0.1
+neighbor 199.0.0.2 remote-as 100
+neighbor 151.0.0.2 remote-as 300
+neighbor 152.0.0.2 remote-as 400
+neighbor 153.0.0.2 remote-as 500
+network 199.0.0.0 mask 255.255.255.252
+network 151.0.0.0 mask 255.255.255.252
+network 152.0.0.0 mask 255.255.255.252
+network 153.0.0.0 mask 255.255.255.252
+exit
+!
+!
+exit
+!
+wr
+!
