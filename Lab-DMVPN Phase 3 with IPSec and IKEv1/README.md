@@ -32,7 +32,8 @@ Below is information about the goals, settings, EVE-NG file and diagram used.
 
 ## Diagram
 
-- The diagram can be found in the "Diagram" directory.
+![Test Image 1](https://github.com/hugothomazpsouza/ENARSI/blob/main/Lab-DMVPN%20Phase%203%20with%20IPSec%20and%20IKEv1/Diagram/DMVPN%20Diagram.jpg)
+
 
 
 
