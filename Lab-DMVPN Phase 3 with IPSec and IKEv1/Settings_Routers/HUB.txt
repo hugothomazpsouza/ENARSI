@@ -95,6 +95,3 @@ end
 !
 wr
 !
-!
-ping 10.0.0.254 source tun0
-!
